@@ -1,16 +1,16 @@
-from util import *
+from .util import *
 
 
 @dataclass()
-class TokenRegistration(PlutusData):
-    subject: Token
+class Registration(PlutusData):
+    subject: PubKeyHash
     signer: PubKeyHash
 
 
 TOKENNAME = b"trusted"
 
 
-def validator(datum: TokenRegistration, _r: NoRedeemer, ctx: ScriptContext) -> None:
+def validator(datum: Registration, _r: NoRedeemer, ctx: ScriptContext) -> None:
     purpose = ctx.purpose
     if isinstance(purpose, Minting):
         own_addr = own_address(purpose.policy_id)
@@ -34,11 +34,11 @@ def validator(datum: TokenRegistration, _r: NoRedeemer, ctx: ScriptContext) -> N
             tx_out_attached = utxo.datum
             if isinstance(tx_out_attached, SomeOutputDatumHash):
                 # this cast does not but going on to treat the resulting object with the new type
-                out_datum: TokenRegistration = ctx.tx_info.data.get(
+                out_datum: Registration = ctx.tx_info.data.get(
                     tx_out_attached.datum_hash, Nothing()
                 )
             elif isinstance(tx_out_attached, SomeOutputDatum):
-                out_datum: TokenRegistration = tx_out_attached.datum
+                out_datum: Registration = tx_out_attached.datum
             else:
                 assert False, "Outputs to contract address need a datum"
             assert (

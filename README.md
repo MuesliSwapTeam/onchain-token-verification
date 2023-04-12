@@ -79,6 +79,20 @@ The following contracts are used (certificate addr | certificate addr reference 
 
 ### Registering as an entity
 
+#### Using PyCardano
+
+We provide some simple scripts to register using a PyCardano script.
+
+```bash
+$ pip install -r requirements.txt
+$ bash build_contracts.sh
+$ python3 -m onchain_token_verification.scripts.create_key_pair owner
+$ # make sure to fund the script address in keys/owner.addr before running the next command
+$ python3 -m onchain_token_verification.scripts.register_authority_trust owner owner
+```
+
+#### Using the Cardano-CLI
+
 First, generate a key pair as an entity.
 
 ```bash
@@ -265,7 +279,7 @@ You can build a contracts using the attached build script
 
 ```bash
 cd contracts
-bash build.sh
+bash build_contracts.sh
 ```
 
 You can find more information about the opshin programming language in the [opshin language](https://github.com/OpShin/opshin)
