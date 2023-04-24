@@ -1,6 +1,7 @@
 """ Registers a new authority for signatures, signed with the given key """
 
 import click
+from opshin.ledger.api_v2 import Nothing
 from pycardano import (
     OgmiosChainContext,
     Address,
@@ -12,6 +13,8 @@ from pycardano import (
     Value,
     PlutusV2Script,
     UTxO,
+    DeserializeException,
+    AssetName,
 )
 
 from onchain_token_verification.utils import (
@@ -47,30 +50,36 @@ def main(signer_key: str, authority_key: str):
     # Build the transaction
     builder = TransactionBuilder(context)
     builder.add_input_address(signer_key_address)
-    datum = Registration(
-        authority_key_address.payment_part.to_primitive(),
-        signer_key_address.payment_part.to_primitive(),
-    )
+    authority_key_bytes = authority_key_address.payment_part.to_primitive()
+    signer_key_bytes = signer_key_address.payment_part.to_primitive()
     # Find the trust UTxO
     utxo_to_spend = None
     inlined = None
     for utxo in context.utxos(str(contract_address)):
+        try:
+            if utxo.output.datum is not None:
+                cbor = utxo.output.datum.cbor
+                datum = Registration.from_cbor(cbor)
+                inlined = True
+            elif utxo.output.datum_hash is not None:
+                datum = Registration(authority_key_bytes, signer_key_bytes, Nothing())
+                assert datum.hash() == utxo.output.datum_hash
+                inlined = False
+            else:
+                continue
+        except (DeserializeException, AssertionError):
+            continue
+        if datum.subject != authority_key_bytes or datum.signer != signer_key_bytes:
+            continue
         if (
-            utxo.output.datum is not None
-            and utxo.output.datum.cbor == datum.to_cbor("bytes")
-            and utxo.output.amount.multi_asset.get(contract_hash) is not None
+            utxo.output.amount.multi_asset.get(contract_hash, {b"": 0}).get(
+                AssetName(TOKENNAME), 0
+            )
+            < 1
         ):
-            utxo_to_spend = utxo
-            inlined = True
-            break
-        elif (
-            utxo.output.datum_hash is not None
-            and utxo.output.datum_hash == datum.hash()
-            and utxo.output.amount.multi_asset.get(contract_hash) is not None
-        ):
-            utxo_to_spend = utxo
-            inlined = False
-            break
+            continue
+        utxo_to_spend = utxo
+        break
     assert isinstance(utxo_to_spend, UTxO), "No script UTxOs found!"
 
     builder.add_script_input(

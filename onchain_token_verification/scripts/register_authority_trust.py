@@ -1,6 +1,8 @@
 """ Registers a new authority for signatures, signed with the given key """
+from typing import Optional
 
 import click
+from opshin.ledger.api_v2 import Nothing
 from pycardano import (
     OgmiosChainContext,
     Address,
@@ -13,6 +15,7 @@ from pycardano import (
     PlutusV2Script,
 )
 
+from onchain_token_verification.contracts.cip68 import CIP68Datum
 from onchain_token_verification.utils import (
     get_address,
     get_signing_info,
@@ -30,7 +33,16 @@ from onchain_token_verification.contracts.register_authority_trust import (
 @click.command()
 @click.argument("signer_key")
 @click.argument("authority_key")
-def main(signer_key: str, authority_key: str):
+@click.argument("authority_name")
+@click.option("--authority-url", required=False)
+@click.option("--authority-image", required=False)
+def main(
+    signer_key: str,
+    authority_key: str,
+    authority_name: str,
+    authority_url: Optional[str],
+    authority_image: Optional[str],
+):
     # Load chain context
     context = OgmiosChainContext(ogmios_url, network=network)
 
@@ -49,6 +61,23 @@ def main(signer_key: str, authority_key: str):
     datum = Registration(
         authority_key_address.payment_part.to_primitive(),
         signer_key_address.payment_part.to_primitive(),
+        CIP68Datum(
+            metadata={
+                b"name": authority_name.encode("utf8"),
+                **(
+                    {b"url": authority_url.encode("utf8")}
+                    if authority_url is not None
+                    else {}
+                ),
+                **(
+                    {b"image": authority_image.encode("utf8")}
+                    if authority_image is not None
+                    else {}
+                ),
+            },
+            version=1,
+            extra=Nothing(),
+        ),
     )
     # Flat attach 2 ADA, next to the minted NFT proving signature rights
     amount = 2000000

@@ -39,6 +39,7 @@ They require a datum like the following:
 Datum = {
    subject: (Policy ID, Asset, Pubkeyhash) -- Depending on the use case 
    signer: Pubkeyhash
+   aux_data: CIP68Datum
 }
 ```
 
@@ -76,6 +77,18 @@ The following contracts are used (certificate addr | certificate addr reference 
  - Certificate of mistrust for token: `addr003` | ref003 | `000003` | refmint00003
 
 > Note: These values are not set yet, as this is a first draft of the proposal and subject to change
+> 
+## Building the Contracts
+
+Make sure that you have Python3.8-3.11 installed locally.
+You can build a contracts using the attached build script
+
+```bash
+bash build_contracts.sh
+```
+
+You can find more information about the opshin programming language in the [opshin language](https://github.com/OpShin/opshin)
+repository.
 
 ### Registering as an entity
 
@@ -88,7 +101,9 @@ $ pip install -r requirements.txt
 $ bash build_contracts.sh
 $ python3 -m onchain_token_verification.scripts.create_key_pair owner
 $ # make sure to fund the script address in keys/owner.addr before running the next command
-$ python3 -m onchain_token_verification.scripts.register_authority_trust owner owner
+$ python3 -m onchain_token_verification.scripts.register_authority_trust owner owner myauthority
+# you can deregister again
+$ python3 -m onchain_token_verification.scripts.withdraw_authority_trust owner
 ```
 
 #### Using the Cardano-CLI
@@ -243,6 +258,15 @@ cardano-cli transaction sign --tx-body-file matx.raw --signing-key-file payment.
 cardano-cli transaction submit --tx-file matx.signed --mainnet
 ```
 
+## Attaching Metadata
+
+We implement CIP 68 to attach metadata in a smart contract processable way into the datum.
+The metadata that is signed by the authorities is stored in the third field of the attached data
+and optional.
+Refer to the implementation for more details on how it is generated in detail, however any implementation of CIP68
+should fit in naively.
+
+
 ## How does this compare to other approaches to storing token metadata?
 
 
@@ -259,7 +283,7 @@ Drawbacks:
  - gives no way for a third party to store opinions about tokens
  - ambiguous in case of tokens with smart contract minting policies
 
-There are also [CIP 25](https://cips.cardano.org/cips/cip25/) that standardizes storage of metadata together with token mints
+There are also [CIP 25](https://cips.cardano.org/cips/cip25/) and [CIP 69](https://cips.cardano.org/cips/cip68/) that standardize storage of metadata together with token mints
 
 Benefits
 
@@ -271,16 +295,3 @@ Drawbacks
  - gives no way for a third party to store opinions about tokens
 
 Hence neither of these approaches is suitable for a registry that allows independent parties to voice any opinions about tokens owned by third parties, at least not without much effort.
-
-## Building the Contracts
-
-Make sure that you have Python3.8 installed locally.
-You can build a contracts using the attached build script
-
-```bash
-cd contracts
-bash build_contracts.sh
-```
-
-You can find more information about the opshin programming language in the [opshin language](https://github.com/OpShin/opshin)
-repository.

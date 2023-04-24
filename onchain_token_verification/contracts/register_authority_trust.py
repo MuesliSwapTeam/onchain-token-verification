@@ -1,3 +1,4 @@
+from .cip68 import *
 from .util import *
 
 
@@ -5,6 +6,7 @@ from .util import *
 class Registration(PlutusData):
     subject: PubKeyHash
     signer: PubKeyHash
+    metadata: Union[CIP68Datum, Nothing]
 
 
 TOKENNAME = b"trusted"
