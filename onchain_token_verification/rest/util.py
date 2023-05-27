@@ -3,6 +3,8 @@ import os
 
 import opshin
 
+from ..utils import get_contract
+
 # path to store temporary data
 # for optimal use, mount in RAM
 DATA_DIR = Path(os.getenv("DATA_DIR", "./data"))
@@ -14,19 +16,20 @@ from ..contracts import (
     token_trust,
 )
 
+
+def contract_name(contract):
+    return Path(contract.__file__).stem
+
+
 CONTRACTS = [
     authority_trust,
     token_trust,
     token_mistrust,
 ]
 CONTRACT_ARTIFACTS = [
-    opshin.generate_artifacts(opshin.build(contract.__file__, force_three_params=True))
+    opshin.generate_artifacts(get_contract(contract_name(contract)))
     for contract in CONTRACTS
 ]
-
-
-def contract_name(contract):
-    return Path(contract.__file__).stem
 
 
 FULL_LIST = "subjects"

@@ -47,7 +47,7 @@ def main(
     context = OgmiosChainContext(ogmios_url, network=network)
 
     # Load script info
-    contract: PlutusV2Script = get_contract("register_authority_trust")
+    contract: PlutusV2Script = get_contract("authority_trust")
     contract_hash = plutus_script_hash(contract)
     contract_address = Address(contract_hash, network=network)
 
@@ -106,6 +106,7 @@ def main(
 
     print(f"transaction id: {signed_tx.id}")
     print(f"Cardanoscan: https://preview.cardanoscan.io/transaction/{signed_tx.id}")
+    print(f"Cexplorer: https://preview.cexplorer.io/tx/{signed_tx.id}")
 
 
 if __name__ == "__main__":

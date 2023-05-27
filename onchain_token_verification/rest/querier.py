@@ -81,7 +81,7 @@ def fetch_entities(interval, contract, artifacts):
                     continue
 
                 # generate a frozen version of the trust datum json representation
-                subject = freeze(PlutusData.to_json(trust_datum.subject))
+                subject = PlutusData.to_json(trust_datum.subject)
                 # attach all the metadata and the original signer
                 registered_subjects[subject].append(
                     {
@@ -96,7 +96,8 @@ def fetch_entities(interval, contract, artifacts):
                 )
 
             registered_subjects_list = [
-                {"subject": s, "verifiers": d} for s, d in registered_subjects.items()
+                {"subject": json.loads(s), "verifiers": d}
+                for s, d in registered_subjects.items()
             ]
 
             atomic_dump(
@@ -110,7 +111,7 @@ def fetch_entities(interval, contract, artifacts):
             for subject, trustees in registered_subjects.items():
                 for trustee in trustees:
                     signed_by[trustee["signer"]].append(
-                        {"subject": subject, "signature": trustee}
+                        {"subject": json.loads(subject), "signature": trustee}
                     )
             signed_by_list = [
                 {"signer": signer, "subjects": subjects}

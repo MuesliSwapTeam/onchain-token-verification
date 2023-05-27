@@ -1,5 +1,5 @@
-from .cip68 import *
-from .util import *
+from onchain_token_verification.contracts.cip68 import *
+from onchain_token_verification.contracts.util import *
 
 
 @dataclass()
