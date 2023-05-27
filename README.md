@@ -77,14 +77,34 @@ The following contracts are used (certificate addr | certificate addr reference 
  - Certificate of mistrust for token: `addr003` | ref003 | `000003` | refmint00003
 
 > Note: These values are not set yet, as this is a first draft of the proposal and subject to change
-> 
+
+## Installation
+
+## Hosting the endpoint
+
+This repository contains endpoints automatically fetch and serve up-to-date
+information about registered entities on the network.
+To host the server, you need to run the querier and the server in parallel.
+The querier fetches data from the chain asynchronously and stores it in the given
+data directory.
+For best performance, mount this directory to RAM.
+
+```bash
+$ export DATA_DIR=/absolute/path/to/data/directory 
+$ python3 -m onchain_token_verification.rest.querier &
+$ FLASK_APP=onchain_token_verification.rest.server FLASK_ENV=development python3 -m flask run &
+```
+
+You can access the list of verified subjects for each contract at `http://<host>/<contract_name>/list`.
+For example with the above configuration you will find the list of registered verification authorities at `http://localhost:5000/authority_trust/list`
+
 ## Building the Contracts
 
 Make sure that you have Python3.8-3.11 installed locally.
 You can build a contracts using the attached build script
 
 ```bash
-bash build_contracts.sh
+$ bash build_contracts.sh
 ```
 
 You can find more information about the opshin programming language in the [opshin language](https://github.com/OpShin/opshin)
@@ -269,6 +289,7 @@ should fit in naively.
 
 ## How does this compare to other approaches to storing token metadata?
 
+### CIP 26: cardano-token-registry
 
 There have been attempts at collecting the data off-chain in the [cardano-token-registry](https://github.com/cardano-foundation/cardano-token-registry) standardized in [CIP 26](https://cips.cardano.org/cips/cip26/).
 
@@ -283,7 +304,9 @@ Drawbacks:
  - gives no way for a third party to store opinions about tokens
  - ambiguous in case of tokens with smart contract minting policies
 
-There are also [CIP 25](https://cips.cardano.org/cips/cip25/) and [CIP 69](https://cips.cardano.org/cips/cip68/) that standardize storage of metadata together with token mints
+### CIP 25 / CIP 69: On-Chain Metadata
+
+There are also [CIP 25](https://cips.cardano.org/cips/cip25/) and [CIP 68](https://cips.cardano.org/cips/cip68/) that standardize storage of metadata together with token mints
 
 Benefits
 

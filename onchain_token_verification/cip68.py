@@ -31,7 +31,9 @@ def extra_to_json(d: Datum) -> dict:
 
 def metadata_to_json(d: Metadata) -> dict:
     d_dict = json.loads(PlutusData.to_json(d))
-    return {bytes.fromhex(kv["k"]["bytes"]).decode("utf8"): kv["v"] for kv in d_dict["map"]}
+    return {
+        bytes.fromhex(kv["k"]["bytes"]).decode("utf8"): kv["v"] for kv in d_dict["map"]
+    }
 
 
 def cip68_to_json(d: CIP68Datum) -> dict:

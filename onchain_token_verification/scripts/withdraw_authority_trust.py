@@ -24,7 +24,7 @@ from onchain_token_verification.utils import (
     ogmios_url,
     get_contract,
 )
-from onchain_token_verification.contracts.register_authority_trust import (
+from onchain_token_verification.contracts.authority_trust import (
     Registration,
     NoRedeemer,
     TOKENNAME,
