@@ -43,6 +43,6 @@ def validator(datum: Registration, _r: NoRedeemer, ctx: ScriptContext) -> None:
                 out_datum: Registration = tx_out_attached.datum
             else:
                 assert False, "Outputs to contract address need a datum"
-            assert (
-                out_datum.signer in ctx.tx_info.signatories
-            ), "Designated signer is not present in signatories"
+            assert (out_datum.signer in ctx.tx_info.signatories) or (
+                out_datum.signer in ctx.tx_info.mint.keys()
+            ), "Designated signer is not present in signatories or minting scripts"
